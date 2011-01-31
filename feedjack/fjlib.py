@@ -124,7 +124,7 @@ def get_extra_content(site, sfeeds_ids, ctx):
         ctx['feeds'] = []
         ctx['last_modified'] = '??'
     ctx['site'] = site
-    ctx['media_url'] = '%s/feedjack/%s' % (settings.MEDIA_URL, site.template)
+    ctx['media_url'] = '%sfeedjack/%s' % (settings.MEDIA_URL, site.template)
 
 def get_posts_tags(object_list, sfeeds_obj, user_id, tag_name):
     """ Adds a qtags property in every post object in a page.

@@ -11,14 +11,14 @@ from django.utils.translation import ugettext_lazy as _
 from feedjack import models
 
 
-class LinkAdmin(admin.ModelAdmin):
-    pass
+#class LinkAdmin(admin.ModelAdmin):
+    #pass
 
 
 
-class SiteAdmin(admin.ModelAdmin):
-    list_display = ('url', 'name')
-    filter_vertical = ('links',)
+#class SiteAdmin(admin.ModelAdmin):
+    #list_display = ('url', 'name')
+    #filter_vertical = ('links',)
 
 
 
@@ -45,16 +45,15 @@ class PostAdmin(admin.ModelAdmin):
     filter_vertical = ('tags',)
 
 
+#class SubscriberAdmin(admin.ModelAdmin):
+    #list_display = ('name', 'site', 'feed')
+    #list_filter = ('site',)
 
-class SubscriberAdmin(admin.ModelAdmin):
-    list_display = ('name', 'site', 'feed')
-    list_filter = ('site',)
 
-
-admin.site.register(models.Link, LinkAdmin)
+#admin.site.register(models.Link, LinkAdmin)
 admin.site.register(models.Site, SiteAdmin)
 admin.site.register(models.Feed, FeedAdmin)
 admin.site.register(models.Post, PostAdmin)
-admin.site.register(models.Subscriber, SubscriberAdmin)
+#admin.site.register(models.Subscriber, SubscriberAdmin)
 
 #~

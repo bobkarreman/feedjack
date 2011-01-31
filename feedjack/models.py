@@ -11,26 +11,35 @@ from django.db import models
 from django.utils.translation import ugettext_lazy as _ 
 from django.utils.encoding import smart_unicode
 
-from feedjack import fjcache
+#from feedjack import fjcache
+from feedjack_update import Dispatcher
+import optparse
 
 SITE_ORDERBY_CHOICES = (
     (1, _('Date published.')),
     (2, _('Date the post was first obtained.'))
 )
 
-class Link(models.Model):
-    name = models.CharField(_('name'), max_length=100, unique=True)
-    link = models.URLField(_('link'), verify_exists=True)
+#VERSION = '0.9.16'
+#URL = 'http://www.feedjack.org/'
+#USER_AGENT = 'Feedjack %s - %s' % (VERSION, URL)
+#SLOWFEED_WARNING = 10
+#ENTRY_NEW, ENTRY_UPDATED, ENTRY_SAME, ENTRY_ERR = range(4)
+#FEED_OK, FEED_SAME, FEED_ERRPARSE, FEED_ERRHTTP, FEED_ERREXC = range(5)
 
-    class Meta:
-        verbose_name = _('link')
-        verbose_name_plural = _('links')
+#class Link(models.Model):
+    #name = models.CharField(_('name'), max_length=100, unique=True)
+    #link = models.URLField(_('link'), verify_exists=True)
         
-    class Admin:
-        pass
+    #class Meta:
+        #verbose_name = _('link')
+        #verbose_name_plural = _('links')
 
-    def __unicode__(self):
-        return u'%s (%s)' % (self.name, self.link)
+    #class Admin:
+        #pass
+
+    #def __unicode__(self):
+        #return u'%s (%s)' % (self.name, self.link)
 
 
 
@@ -95,8 +104,10 @@ class Site(models.Model):
 class Feed(models.Model):
     feed_url = models.URLField(_('feed url'), unique=True)
 
+    is_ics = models.BooleanField(_('is_ics'), default=False)
+
     name = models.CharField(_('name'), max_length=100)
-    shortname = models.CharField(_('shortname'), max_length=50)
+    shortname = models.CharField(_('shortname'), max_length=255)
     is_active = models.BooleanField(_('is active'), default=True,
         help_text=_('If disabled, this feed will not be further updated.') )
 
@@ -105,7 +116,7 @@ class Feed(models.Model):
     link = models.URLField(_('link'), blank=True)
 
     # http://feedparser.org/docs/http-etag.html
-    etag = models.CharField(_('etag'), max_length=50, blank=True)
+    etag = models.CharField(_('etag'), max_length=255, blank=True)
     last_modified = models.DateTimeField(_('last modified'), null=True, blank=True)
     last_checked = models.DateTimeField(_('last checked'), null=True, blank=True)
 
@@ -119,11 +130,31 @@ class Feed(models.Model):
 
     def save(self):
         super(Feed, self).save()
-
+        if self.last_checked == None and self.is_ics == 'False':
+          parser = optparse.OptionParser(usage='%prog [options]')
+          #parser.add_option('--settings',
+      #help='Python path to settings module. If this isn\'t provided, ' \
+           #'the DJANGO_SETTINGS_MODULE enviroment variable will be used.')
+          parser.add_option('-f', '--feed', action='append',
+      help='A feed url to be updated. This option can be given multiple ' \
+           'times to update several feeds at the same time ')
+          #parser.add_option('-s', '--site', type='int',
+      #help='A site id to update.')
+          #parser.add_option('-v', '--verbose', action='store_true',
+      #dest='verbose', default=False, help='Verbose output.')
+          #parser.add_option('-t', '--timeout', type='int', default=10,
+      #help='Wait timeout in seconds when connecting to feeds.')
+          #parser.add_option('-w', '--workerthreads', type='int', default=10,
+      #help='Worker threads that will fetch feeds in parallel.')
+          options = parser.parse_args()[0]
+          options.feed = self.feed_url              
+          disp = Dispatcher(options, 10, None)
+          disp.add_job(self)
+          super(Feed, self).save()
 
 
 class Tag(models.Model):
-    name = models.CharField(_('name'), max_length=50, unique=True)
+    name = models.CharField(_('name'), max_length=255, unique=True)
 
     class Meta:
         verbose_name = _('tag')
@@ -143,7 +174,7 @@ class Post(models.Model):
     content = models.TextField(_('content'), blank=True)
     date_modified = models.DateTimeField(_('date modified'), null=True, blank=True)
     guid = models.CharField(_('guid'), max_length=200, db_index=True)
-    author = models.CharField(_('author'), max_length=50, blank=True)
+    author = models.CharField(_('author'), max_length=255, blank=True)
     author_email = models.EmailField(_('author email'), blank=True)
     comments = models.URLField(_('comments'), blank=True)
     tags = models.ManyToManyField(Tag, verbose_name=_('tags'))
@@ -166,38 +197,38 @@ class Post(models.Model):
 
 
 
-class Subscriber(models.Model):
-    site = models.ForeignKey(Site, verbose_name=_('site') )
-    feed = models.ForeignKey(Feed, verbose_name=_('feed') )
+#class Subscriber(models.Model):
+    #site = models.ForeignKey(Site, verbose_name=_('site') )
+    #feed = models.ForeignKey(Feed, verbose_name=_('feed') )
 
-    name = models.CharField(_('name'), max_length=100, null=True, blank=True,
-        help_text=_('Keep blank to use the Feed\'s original name.') )
-    shortname = models.CharField(_('shortname'), max_length=50, null=True,
-      blank=True,
-      help_text=_('Keep blank to use the Feed\'s original shortname.') )
-    is_active = models.BooleanField(_('is active'), default=True,
-        help_text=_('If disabled, this subscriber will not appear in the site or '
-        'in the site\'s feed.') )
+    #name = models.CharField(_('name'), max_length=100, null=True, blank=True,
+        #help_text=_('Keep blank to use the Feed\'s original name.') )
+    #shortname = models.CharField(_('shortname'), max_length=50, null=True,
+      #blank=True,
+      #help_text=_('Keep blank to use the Feed\'s original shortname.') )
+    #is_active = models.BooleanField(_('is active'), default=True,
+        #help_text=_('If disabled, this subscriber will not appear in the site or '
+        #'in the site\'s feed.') )
 
-    class Meta:
-        verbose_name = _('subscriber')
-        verbose_name_plural = _('subscribers')
-        ordering = ('site', 'name', 'feed')
-        unique_together = (('site', 'feed'),)
+    #class Meta:
+        #verbose_name = _('subscriber')
+        #verbose_name_plural = _('subscribers')
+        #ordering = ('site', 'name', 'feed')
+        #unique_together = (('site', 'feed'),)
 
-    def __unicode__(self):
-        return u'%s in %s' % (self.feed, self.site)
+    #def __unicode__(self):
+        #return u'%s in %s' % (self.feed, self.site)
 
-    def get_cloud(self):
-        from feedjack import fjcloud
-        return fjcloud.getcloud(self.site, self.feed.id)
+    #def get_cloud(self):
+        #from feedjack import fjcloud
+        #return fjcloud.getcloud(self.site, self.feed.id)
 
-    def save(self):
-        if not self.name:
-            self.name = self.feed.name
-        if not self.shortname:
-            self.shortname = self.feed.shortname
-        super(Subscriber, self).save()
+    #def save(self):
+        #if not self.name:
+            #self.name = self.feed.name
+        #if not self.shortname:
+            #self.shortname = self.feed.shortname
+        #super(Subscriber, self).save()
 
 
 #~
