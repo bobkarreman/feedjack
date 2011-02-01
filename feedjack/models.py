@@ -27,19 +27,19 @@ SITE_ORDERBY_CHOICES = (
 #ENTRY_NEW, ENTRY_UPDATED, ENTRY_SAME, ENTRY_ERR = range(4)
 #FEED_OK, FEED_SAME, FEED_ERRPARSE, FEED_ERRHTTP, FEED_ERREXC = range(5)
 
-#class Link(models.Model):
-    #name = models.CharField(_('name'), max_length=100, unique=True)
-    #link = models.URLField(_('link'), verify_exists=True)
+class Link(models.Model):
+    name = models.CharField(_('name'), max_length=100, unique=True)
+    link = models.URLField(_('link'), verify_exists=True)
         
-    #class Meta:
-        #verbose_name = _('link')
-        #verbose_name_plural = _('links')
+    class Meta:
+        verbose_name = _('link')
+        verbose_name_plural = _('links')
 
-    #class Admin:
-        #pass
+    class Admin:
+        pass
 
-    #def __unicode__(self):
-        #return u'%s (%s)' % (self.name, self.link)
+    def __unicode__(self):
+        return u'%s (%s)' % (self.name, self.link)
 
 
 
@@ -174,6 +174,7 @@ class Post(models.Model):
     content = models.TextField(_('content'), blank=True)
     date_modified = models.DateTimeField(_('date modified'), null=True, blank=True)
     guid = models.CharField(_('guid'), max_length=200, db_index=True)
+    uid = models.CharField(_('uid'), max_length=200, db_index=True, null=True)
     author = models.CharField(_('author'), max_length=255, blank=True)
     author_email = models.EmailField(_('author email'), blank=True)
     comments = models.URLField(_('comments'), blank=True)
