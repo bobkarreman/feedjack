@@ -27,76 +27,76 @@ SITE_ORDERBY_CHOICES = (
 #ENTRY_NEW, ENTRY_UPDATED, ENTRY_SAME, ENTRY_ERR = range(4)
 #FEED_OK, FEED_SAME, FEED_ERRPARSE, FEED_ERRHTTP, FEED_ERREXC = range(5)
 
-class Link(models.Model):
-    name = models.CharField(_('name'), max_length=100, unique=True)
-    link = models.URLField(_('link'), verify_exists=True)
+#class Link(models.Model):
+    #name = models.CharField(_('name'), max_length=100, unique=True)
+    #link = models.URLField(_('link'), verify_exists=True)
         
-    class Meta:
-        verbose_name = _('link')
-        verbose_name_plural = _('links')
+    #class Meta:
+        #verbose_name = _('link')
+        #verbose_name_plural = _('links')
 
-    class Admin:
-        pass
+    #class Admin:
+        #pass
 
-    def __unicode__(self):
-        return u'%s (%s)' % (self.name, self.link)
+    #def __unicode__(self):
+        #return u'%s (%s)' % (self.name, self.link)
 
 
 
-class Site(models.Model):
-    name = models.CharField(_('name'), max_length=100)
-    url = models.CharField(_('url'),
-      max_length=100,
-      unique=True,
-      help_text=u'%s: %s, %s' % (smart_unicode(_('Example')),
-        u'http://www.planetexample.com',
-        u'http://www.planetexample.com:8000/foo'))
-    title = models.CharField(_('title'), max_length=200)
-    description = models.TextField(_('description'))
-    welcome = models.TextField(_('welcome'), null=True, blank=True)
-    greets = models.TextField(_('greets'), null=True, blank=True)
+#class Site(models.Model):
+    #name = models.CharField(_('name'), max_length=100)
+    #url = models.CharField(_('url'),
+      #max_length=100,
+      #unique=True,
+      #help_text=u'%s: %s, %s' % (smart_unicode(_('Example')),
+        #u'http://www.planetexample.com',
+        #u'http://www.planetexample.com:8000/foo'))
+    #title = models.CharField(_('title'), max_length=200)
+    #description = models.TextField(_('description'))
+    #welcome = models.TextField(_('welcome'), null=True, blank=True)
+    #greets = models.TextField(_('greets'), null=True, blank=True)
 
-    default_site = models.BooleanField(_('default site'), default=False)
-    posts_per_page = models.IntegerField(_('posts per page'), default=20)
-    order_posts_by = models.IntegerField(_('order posts by'), default=1,
-        choices=SITE_ORDERBY_CHOICES)
-    tagcloud_levels = models.IntegerField(_('tagcloud level'), default=5)
-    show_tagcloud = models.BooleanField(_('show tagcloud'), default=True)
+    #default_site = models.BooleanField(_('default site'), default=False)
+    #posts_per_page = models.IntegerField(_('posts per page'), default=20)
+    #order_posts_by = models.IntegerField(_('order posts by'), default=1,
+        #choices=SITE_ORDERBY_CHOICES)
+    #tagcloud_levels = models.IntegerField(_('tagcloud level'), default=5)
+    #show_tagcloud = models.BooleanField(_('show tagcloud'), default=True)
     
-    use_internal_cache = models.BooleanField(_('use internal cache'), default=True)
-    cache_duration = models.IntegerField(_('cache duration'), default=60*60*24,
-        help_text=_('Duration in seconds of the cached pages and data.') )
+    #use_internal_cache = models.BooleanField(_('use internal cache'), default=True)
+    #cache_duration = models.IntegerField(_('cache duration'), default=60*60*24,
+        #help_text=_('Duration in seconds of the cached pages and data.') )
 
-    links = models.ManyToManyField(Link, verbose_name=_('links'),
-      null=True, blank=True)
-    template = models.CharField(_('template'), max_length=100, null=True,
-      blank=True, 
-      help_text=_('This template must be a directory in your feedjack '
-        'templates directory. Leave blank to use the default template.') )
+    #links = models.ManyToManyField(Link, verbose_name=_('links'),
+      #null=True, blank=True)
+    #template = models.CharField(_('template'), max_length=100, null=True,
+      #blank=True, 
+      #help_text=_('This template must be a directory in your feedjack '
+        #'templates directory. Leave blank to use the default template.') )
 
-    class Meta:
-        verbose_name = _('site')
-        verbose_name_plural = _('sites')
-        ordering = ('name',)
+    #class Meta:
+        #verbose_name = _('site')
+        #verbose_name_plural = _('sites')
+        #ordering = ('name',)
 
-    def __unicode__(self):
-        return self.name
+    #def __unicode__(self):
+        #return self.name
 
-    def save(self):
-        if not self.template:
-            self.template = 'default'
-        # there must be only ONE default site
-        defs = Site.objects.filter(default_site=True)
-        if not defs:
-            self.default_site = True
-        elif self.default_site:
-            for tdef in defs:
-                if tdef.id != self.id:
-                    tdef.default_site = False
-                    tdef.save()
-        self.url = self.url.rstrip('/')
-        fjcache.hostcache_set({})
-        super(Site, self).save()
+    #def save(self):
+        #if not self.template:
+            #self.template = 'default'
+        ## there must be only ONE default site
+        #defs = Site.objects.filter(default_site=True)
+        #if not defs:
+            #self.default_site = True
+        #elif self.default_site:
+            #for tdef in defs:
+                #if tdef.id != self.id:
+                    #tdef.default_site = False
+                    #tdef.save()
+        #self.url = self.url.rstrip('/')
+        #fjcache.hostcache_set({})
+        #super(Site, self).save()
 
 
 
@@ -104,7 +104,7 @@ class Site(models.Model):
 class Feed(models.Model):
     feed_url = models.URLField(_('feed url'), unique=True)
 
-    is_ics = models.BooleanField(_('is_ics'), default=False)
+    uid = models.CharField(_('uid'), max_length=100)
 
     name = models.CharField(_('name'), max_length=100)
     shortname = models.CharField(_('shortname'), max_length=255)
@@ -128,29 +128,29 @@ class Feed(models.Model):
     def __unicode__(self):
         return u'%s (%s)' % (self.name, self.feed_url)
 
-    def save(self):
-        super(Feed, self).save()
-        if self.last_checked == None and self.is_ics == 'False':
-          parser = optparse.OptionParser(usage='%prog [options]')
-          #parser.add_option('--settings',
-      #help='Python path to settings module. If this isn\'t provided, ' \
-           #'the DJANGO_SETTINGS_MODULE enviroment variable will be used.')
-          parser.add_option('-f', '--feed', action='append',
-      help='A feed url to be updated. This option can be given multiple ' \
-           'times to update several feeds at the same time ')
-          #parser.add_option('-s', '--site', type='int',
-      #help='A site id to update.')
-          #parser.add_option('-v', '--verbose', action='store_true',
-      #dest='verbose', default=False, help='Verbose output.')
-          #parser.add_option('-t', '--timeout', type='int', default=10,
-      #help='Wait timeout in seconds when connecting to feeds.')
-          #parser.add_option('-w', '--workerthreads', type='int', default=10,
-      #help='Worker threads that will fetch feeds in parallel.')
-          options = parser.parse_args()[0]
-          options.feed = self.feed_url              
-          disp = Dispatcher(options, 10, None)
-          disp.add_job(self)
-          super(Feed, self).save()
+    #def save(self):
+        #super(Feed, self).save()
+        #if self.last_checked == None and self.is_ics == 'False':
+          #parser = optparse.OptionParser(usage='%prog [options]')
+          ##parser.add_option('--settings',
+      ##help='Python path to settings module. If this isn\'t provided, ' \
+           ##'the DJANGO_SETTINGS_MODULE enviroment variable will be used.')
+          #parser.add_option('-f', '--feed', action='append',
+      #help='A feed url to be updated. This option can be given multiple ' \
+           #'times to update several feeds at the same time ')
+          ##parser.add_option('-s', '--site', type='int',
+      ##help='A site id to update.')
+          ##parser.add_option('-v', '--verbose', action='store_true',
+      ##dest='verbose', default=False, help='Verbose output.')
+          ##parser.add_option('-t', '--timeout', type='int', default=10,
+      ##help='Wait timeout in seconds when connecting to feeds.')
+          ##parser.add_option('-w', '--workerthreads', type='int', default=10,
+      ##help='Worker threads that will fetch feeds in parallel.')
+          #options = parser.parse_args()[0]
+          #options.feed = self.feed_url              
+          #disp = Dispatcher(options, 10, None)
+          #disp.add_job(self)
+          #super(Feed, self).save()
 
 
 class Tag(models.Model):

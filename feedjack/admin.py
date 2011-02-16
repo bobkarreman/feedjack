@@ -51,7 +51,7 @@ class PostAdmin(admin.ModelAdmin):
 
 
 #admin.site.register(models.Link, LinkAdmin)
-admin.site.register(models.Site, SiteAdmin)
+#admin.site.register(models.Site, SiteAdmin)
 admin.site.register(models.Feed, FeedAdmin)
 admin.site.register(models.Post, PostAdmin)
 #admin.site.register(models.Subscriber, SubscriberAdmin)
